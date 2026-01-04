@@ -5,7 +5,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 analyzer = SentimentIntensityAnalyzer()
 
-def fetch_gdelt(query="bitcoin", max_records=250, startdatetime=None, enddatetime=None):
+def get_gdelt(query="bitcoin", max_records=250, startdatetime=None, enddatetime=None):
     """
     GDELT DOC 2.1 API.
     - mode=ArtList returns a list of articles
@@ -71,18 +71,18 @@ def fetch_gdelt(query="bitcoin", max_records=250, startdatetime=None, enddatetim
     return df
 
 
-if __name__ == "__main__":
-    df = fetch_gdelt("(bitcoin OR btc OR crypto)", max_records=250, startdatetime="20251227000000",
-    enddatetime="20260101000000")
-    print(df.head())
-    print("Articles:", len(df))
+# if __name__ == "__main__":
+#     df = get_gdelt("(bitcoin OR btc OR crypto)", max_records=250, startdatetime="20251227000000",
+#     enddatetime="20260101000000")
+#     print(df.head())
+#     print("Articles:", len(df))
     
-    fig = px.scatter(
-        df,
-        x="publishedAt",
-        y="negativity",
-        hover_data=["title"],
-        title="Article Negativity Over Time"
-    )
+#     fig = px.scatter(
+#         df,
+#         x="publishedAt",
+#         y="negativity",
+#         hover_data=["title"],
+#         title="Article Negativity Over Time"
+#     )
 
-    fig.show()
+#     fig.show()

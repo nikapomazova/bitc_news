@@ -1,25 +1,63 @@
-import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from news import get_gdelt
+from bitc import get_btc_usd_range
+from datetime import datetime, timezone
 
-data = {'size': [50, 60, 80, 100, 120, 150, 180],
-        'price': [150, 180, 220, 260, 300, 360, 420]}
-df = pd.DataFrame(data)
+news_df = get_gdelt("(bitcoin OR btc OR crypto)", max_records=250, startdatetime="20251227000000",
+    enddatetime="20260101000000")
+end = datetime.now(timezone.utc)
+start = end - pd.Timedelta(days=30)
+btc_df = get_btc_usd_range(start, end)
 
-X = df[['size']] 
-y = df['price']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-model = LinearRegression()
-model.fit(X_train, y_train)
+btc_df = btc_df.copy()
+news_df = news_df.copy()
 
-predictions = model.predict(X_test)
-print("Predictions:", predictions)
+btc_df["time"] = pd.to_datetime(btc_df["time"], utc=True, errors="coerce")
+news_df["publishedAt"] = pd.to_datetime(news_df["publishedAt"], utc=True, errors="coerce")
 
-plt.scatter(X, y, color='blue')
-plt.plot(X, model.predict(X), color='red')
-plt.xlabel('Size (m²)')
-plt.ylabel('Price ($1000s)')
-plt.title('House Price Prediction')
-plt.show()
+news_daily = (
+    news_df.dropna(subset=["publishedAt"])
+           .set_index("publishedAt")
+           .resample("1D")
+           .agg(avg_negativity=("negativity", "mean"), article_count=("negativity", "size"))
+           .reset_index())
+
+btc_daily = (
+    btc_df.dropna(subset=["time"])
+          .set_index("time")
+          .resample("1D")
+          .agg(price=("price", "last"))
+          .reset_index())
+
+fig = go.Figure()
+
+
+fig.add_trace(go.Scatter(
+    x=btc_daily["time"],
+    y=btc_daily["price"],
+    name="BTC Price (USD)",
+    yaxis="y1",
+    mode="lines"
+))
+
+fig.add_trace(go.Scatter(
+    x=news_daily["publishedAt"],
+    y=news_daily["avg_negativity"],
+    name="Avg News Negativity (0–1)",
+    yaxis="y2",
+    mode="lines+markers",
+    # Optional: show volume on hover
+    customdata=news_daily["article_count"],
+    hovertemplate="Date=%{x}<br>Negativity=%{y:.3f}<extra></extra>",
+))
+
+fig.update_layout(
+    title="BTC Price vs News Negativity",
+    xaxis=dict(title="Date (UTC)"),
+    yaxis=dict(title="BTC Price (USD)"),
+    yaxis2=dict(title="Avg News Negativity", overlaying="y", side="right", rangemode="tozero"),
+    legend=dict(orientation="h")
+)
+
+fig.show()
