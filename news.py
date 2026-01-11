@@ -10,7 +10,7 @@ def get_gdelt(query="bitcoin", max_records=250, startdatetime=None, enddatetime=
     GDELT DOC 2.1 API.
     - mode=ArtList returns a list of articles
     - format=json returns JSON
-    - startdatetime/enddatetime are optional: 'YYYYMMDDhhmmss'
+    - startdatetime/enddatetime (optional): 'YYYYMMDDhhmmss'
     """
     url = "https://api.gdeltproject.org/api/v2/doc/doc"
 

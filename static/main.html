@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC & News</title>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+
+        }
+        .title {
+            text-align: center;
+        }
+        .content {
+            display: block;
+            text-align: center;
+        }
+        #content {
+            margin-top: 0.5vh;
+        }
+
+        .date-picker {
+            display: flex;
+            justify-content: center;
+            gap: 1vw;
+            margin-top: 0.5vh;
+            margin-top: 0.5vw;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">
+        <h1>Bitcoin & News Dashboard</h1>
+    </div>
+    <div id="content">
+        <div class="date-picker">
+            <label for="startDate">Start Date:</label>
+            <label for="endDate">End Date:</label>
+        </div>
+        <div class="date-picker">
+            <input type="date" id="startDate" />
+            <input type="date" id="endDate" />
+        </div>
+        <div class="date-picker">
+            <button id="loadDataBtn">Load Data</button>
+        </div>
+
+        <div id="plot" style="height:650px;"></div>
+
+        <script>
+        async function loadAndPlot() {
+        document.getElementById("plot").innerHTML = "Loading...";
+        const start = document.getElementById("startDate").value;
+        const end = document.getElementById("endDate").value;
+
+        if (!start || !end) {
+            alert("Pick both dates");
+            return;
+        }
+
+        const res = await fetch(`/data?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
+        const data = await res.json();
+
+        const btcTrace = {
+            x: data.btc.x,
+            y: data.btc.y,
+            type: "scatter",
+            mode: "lines",
+            name: "BTC Price (USD)",
+            yaxis: "y"
+        };
+
+        const newsTrace = {
+            x: data.news.x,
+            y: data.news.y,
+            type: "scatter",
+            mode: "lines+markers",
+            name: "Avg News Negativity (0-1)",
+            yaxis: "y2",
+            customdata: data.news.count,
+            hovertemplate: "Date=%{x}<br>Negativity=%{y:.3f}<br>Articles=%{customdata}<extra></extra>"
+        };
+
+        const layout = {
+            title: "BTC Price vs News Negativity",
+            xaxis: { title: "Date (UTC)" },
+            yaxis: { title: "BTC Price (USD)" },
+            yaxis2: { title: "Avg News Negativity", overlaying: "y", side: "right", rangemode: "tozero" },
+            legend: { orientation: "h" }
+        };
+
+        Plotly.newPlot("plot", [btcTrace, newsTrace], layout);
+        }
+
+        document.getElementById("loadDataBtn").addEventListener("click", loadAndPlot);
+        </script>
+
+    </div>
+</body>
+</html>

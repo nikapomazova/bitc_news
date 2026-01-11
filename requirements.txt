@@ -1,0 +1,8 @@
+fastapi
+fastapi.responses
+uvicorn
+pandas
+requests
+plotly
+vaderSentiment
+plotly.express
