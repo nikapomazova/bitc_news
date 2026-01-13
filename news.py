@@ -49,7 +49,7 @@ def get_gdelt(query="bitcoin", max_records=250, startdatetime=None, enddatetime=
         })
 
     df = pd.DataFrame(rows)
-    def negativity_score(text: str) -> float: #Returns a 0-1 score where 1 = very negative.
+    def neg_score(text: str) -> float: #Returns a 0-1 score where 1 = very negative.
 
         if not isinstance(text, str) or not text.strip():
             return 0.0
@@ -58,7 +58,7 @@ def get_gdelt(query="bitcoin", max_records=250, startdatetime=None, enddatetime=
     if not df.empty:
         df["publishedAt"] = pd.to_datetime(df["publishedAt"], utc=True, errors="coerce")
         df["text_for_sentiment"] = (df["title"].fillna("") + " " + df["desc"].fillna(""))
-        df["negativity"] = df["text_for_sentiment"].apply(negativity_score)
+        df["negativity"] = df["text_for_sentiment"].apply(neg_score)
 
     df = df.drop_duplicates(subset=["url"])
     return df

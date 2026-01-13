@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 from datetime import datetime, timezone
 
-def get_btc_usd_range(start_dt: datetime, end_dt: datetime):
+def get_btc(start_dt: datetime, end_dt: datetime):
     start_date = int(start_dt.replace(tzinfo=timezone.utc).timestamp())
     end_date   = int(end_dt.replace(tzinfo=timezone.utc).timestamp())
     print(start_date, end_date)

@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
 from news import get_gdelt
-from bitc import get_btc_usd_range
+from bitc import get_btc
 from datetime import datetime, timezone
 
 end = datetime.now(timezone.utc)
@@ -10,7 +10,7 @@ start_gdelt = start.strftime("%Y%m%d%H%M%S")
 end_gdelt = end.strftime("%Y%m%d%H%M%S")
 news = get_gdelt("(bitcoin OR btc OR crypto)", max_records=250, startdatetime=start_gdelt,
     enddatetime=end_gdelt)
-btc = get_btc_usd_range(start, end)
+btc = get_btc(start, end)
 resample_time = "1D"
 
 btc = btc.copy()
